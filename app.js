@@ -72,7 +72,7 @@ function auth(req, res, next){
 
 app.use(auth);
 
-
+// Here the user is allowed to access the data after authentication
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
