@@ -7,6 +7,7 @@ var session = require('express-session');
 var FileStore = require('session-file-store')(session);
 var passport = require('passport');
 var authenticate = require('./authenticate');
+var config = require('./config')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -22,7 +23,7 @@ const Dishes = require('./models/dishes');
 const Promotions = require('./models/promotions');
 const Leaders = require('./models/leaders');
 
-const url = 'mongodb://localhost:27017/conFusion';
+const url = config.mongoUrl;
 
 const connect = mongoose.connect(url);
 
@@ -40,43 +41,17 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(session({
-  name: 'session-id',
-  secret: '12345-67890-09876-54321',
-  saveUninitialized: false,
-  resave: false,
-  store: new FileStore()
-}))
+
 // app.use(cookieParser('12345-67890-09876-54321'));
 
 
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-function auth (req, res, next) {
+app.use(express.static(path.join(__dirname, 'public'))); // Now public is accessed by anybody
 
-  //console.log(req.session);
-
-  if (!req.user) {
-    // var authHeader = req.headers.authorization;
-    // if (!authHeader) {
-        var err = new Error('You are not authenticated!');
-        //res.setHeader('WWW-Authenticate', 'Basic');              
-        err.status = 403;
-        return next(err);
-  }        
-  else {
-          next();
-  }
-}
-
-app.use(auth);
-
-// Here the user is allowed to access the data after authentication
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
