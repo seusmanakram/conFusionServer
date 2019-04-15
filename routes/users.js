@@ -8,8 +8,18 @@ var router = express.Router();
 router.use(bodyParser.json());
 
 /* GET users listing. */
-router.get('/', function (req, res, next) {
-  res.send('respond with a resource');
+router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function (req, res, next) {
+
+  // Send details of all registered users to the admin panel
+  User.find((err, result) => {
+    if (err) {
+      res.statusCode = 404;
+      res.send('Not found');
+    } else {
+      res.statusCode = 200;
+      res.send(result);
+    }
+  });
 });
 
 module.exports = router;
@@ -26,18 +36,18 @@ router.post('/signup', (req, res, next) => {
         })
       }
       else {
-        if(req.body.firstname)
-          user.firstname =req.body.firstname;
-        if(req.body.lastname)
+        if (req.body.firstname)
+          user.firstname = req.body.firstname;
+        if (req.body.lastname)
           user.lastname = req.body.lastname;
         user.save((err, user) => {
-          if(err) {
+          if (err) {
             res.statusCode = 500;
             res.setHeader('Content-Type', 'application/json');
             res.json({
               err: err
             });
-            return;  
+            return;
           }
           passport.authenticate('local')(req, res, () => {
             res.statusCode = 200;
@@ -55,7 +65,7 @@ router.post('/signup', (req, res, next) => {
 
 router.post('/login', passport.authenticate('local'), (req, res) => {
 
-  var token = authenticate.getToken({_id: req.user._id});
+  var token = authenticate.getToken({ _id: req.user._id });
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
   res.json({
