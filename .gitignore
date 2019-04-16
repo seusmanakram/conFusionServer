@@ -4,3 +4,7 @@ node_modules
 
 # Launch files
 .vscode
+
+# Keys & cert
+bin/*.cert
+bin/*.key
